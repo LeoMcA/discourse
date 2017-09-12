@@ -129,5 +129,77 @@ RSpec.describe Users::OmniauthCallbacksController do
         end
       end
     end
+
+    context 'changing email' do
+      require_dependency 'email_updater'
+
+      def login(identity)
+        OmniAuth.config.mock_auth[:google_oauth2] = OmniAuth::AuthHash.new(
+          provider: 'google_oauth2',
+          uid: "123545#{identity[:username]}",
+          info: OmniAuth::AuthHash::InfoHash.new(
+            email: identity[:email],
+            name: 'Some name'
+          ),
+          extra: {
+            raw_info: OmniAuth::AuthHash.new(
+              email_verified: true,
+              email: identity[:email],
+              family_name: 'Huh',
+              given_name: identity[:name],
+              gender: 'male',
+              name: "#{identity[:name]} Huh",
+            )
+          },
+        )
+
+        Rails.application.env_config["omniauth.auth"] = OmniAuth.config.mock_auth[:google_oauth2]
+
+        get "/auth/google_oauth2/callback.json"
+        JSON.parse(response.body)
+      end
+
+      it 'works as unexpected' do
+        old_email = 'old@email.com'
+        old_identity = { name: 'Bob',
+                         username: 'bob',
+                         email: old_email }
+        user = Fabricate(:user, email: old_email)
+        new_email = 'new@email.com'
+        new_identity = { name: 'Bob',
+                         username: 'boguslaw',
+                         email: new_email }
+
+        updater = EmailUpdater.new(user.guardian, user)
+        updater.change_to(new_email)
+
+        # response = login(new_identity)
+        # expect(response['authenticated']).to eq(nil)
+        # expect(response['email']).to eq(new_email)
+        # we could uncomment and repeat the above 3 lines
+        # infinitely and the spec would continue to pass
+
+        user.reload
+        expect(user.email).to eq(old_email)
+
+        response = login(old_identity)
+        expect(response['authenticated']).to eq(true)
+
+        user.reload
+        expect(user.email).to eq(new_email)
+
+        # response = login(old_identity)
+        # expect(response['authenticated']).to eq(true)
+        # we could uncomment and repeat the above 2 lines
+        # infinitely and the spec would continue to pass
+
+        expect { login(new_identity) }.to raise_error(ActiveRecord::RecordNotUnique)
+
+        # response = login(old_identity)
+        # expect(response['authenticated']).to eq(true)
+        # we could uncomment and repeat the above 2 lines
+        # infinitely and the spec would continue to pass
+      end
+    end
   end
 end
