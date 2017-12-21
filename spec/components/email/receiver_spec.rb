@@ -147,6 +147,12 @@ describe Email::Receiver do
       expect { process(:reply_user_not_matching) }.to raise_error(Email::Receiver::ReplyUserNotMatchingError)
     end
 
+    it "accepts reply from alternate email address" do
+      Fabricate(:alternate_email, email: "someone_else@bar.com", user: user)
+      expect { process(:reply_user_not_matching) }.to change { topic.posts.count }
+      expect(Post.last.user.id).to eq user.id
+    end
+
     it "raises a TopicNotFoundError when the topic was deleted" do
       topic.update_columns(deleted_at: 1.day.ago)
       expect { process(:reply_user_matching) }.to raise_error(Email::Receiver::TopicNotFoundError)
@@ -457,6 +463,19 @@ describe Email::Receiver do
       expect(topic.topic_users.count).to eq(3)
     end
 
+    it "invites users with an alternate email in the chain" do
+      user1 = Fabricate(:user, trust_level: SiteSetting.email_in_min_trust)
+      Fabricate(:alternate_email, email: "discourse@bar.com", user: user1)
+      Fabricate(:alternate_email, email: "someone@else.com", user: user1)
+      user2 = Fabricate(:user, trust_level: SiteSetting.email_in_min_trust)
+      Fabricate(:alternate_email, email: "team@bar.com", user: user2)
+      Fabricate(:alternate_email, email: "wat@bar.com", user: user2)
+
+      expect { process(:cc) }.to change(Topic, :count)
+      user_ids = Topic.last.allowed_users.pluck(:id)
+      expect(user_ids).to contain_exactly(user1.id, user2.id)
+    end
+
     it "cap the number of staged users created per email" do
       SiteSetting.maximum_staged_users_per_email = 1
       expect { process(:cc) }.to change(Topic, :count)
@@ -596,6 +615,14 @@ describe Email::Receiver do
     it "ignores by case-insensitive title" do
       SiteSetting.ignore_by_title = "foo"
       expect { process(:ignored) }.to_not change(Topic, :count)
+    end
+
+    it "associates email from an additional address with user" do
+      user = Fabricate(:user, trust_level: SiteSetting.email_in_min_trust)
+      Fabricate(:alternate_email, email: "existing@bar.com", user: user)
+
+      expect { process(:existing_user) }.to change(Topic, :count)
+      expect(Topic.last.user.id).to eq user.id
     end
   end
 
