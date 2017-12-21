@@ -12,7 +12,7 @@ class UserEmail < ActiveRecord::Base
   validates :email, email: true, format: { with: EmailValidator.email_regex },
                     if: :validate_email?
 
-  validates :primary, uniqueness: { scope: [:user_id] }
+  validates :primary, uniqueness: { scope: [:user_id] }, if: :primary
 
   private
 
