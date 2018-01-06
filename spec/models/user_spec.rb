@@ -1568,4 +1568,17 @@ describe User do
     end
   end
 
+  describe "#alternate_emails" do
+    it "is empty when user has one email" do
+      user = Fabricate(:user_single_email)
+      expect(user.alternate_emails).to be_empty
+    end
+
+    it "only contains alternate emails" do
+      user = Fabricate(:user_single_email)
+      alternate_email = Fabricate(:alternate_email, user: user)
+      expect(user.alternate_emails).to contain_exactly(alternate_email.email)
+    end
+  end
+
 end

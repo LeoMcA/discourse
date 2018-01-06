@@ -2022,21 +2022,25 @@ describe UsersController do
         expect(response).to be_forbidden
       end
 
-      it "returns both email and associated_accounts when you're allowed to see them" do
+      it "returns emails and associated_accounts when you're allowed to see them" do
+        user = Fabricate(:user)
+        alternate_email = user.user_emails.second.email
         Guardian.any_instance.expects(:can_check_emails?).returns(true)
 
         put :check_emails,
-          params: { username: Fabricate(:user).username },
+          params: { username: user.username },
           format: :json
 
         expect(response).to be_success
         json = JSON.parse(response.body)
-        expect(json["email"]).to be_present
+        expect(json["email"]).to eq(user.email)
+        expect(json["alternate_emails"]).to contain_exactly(alternate_email)
         expect(json["associated_accounts"]).to be_present
       end
 
       it "works on inactive users" do
         inactive_user = Fabricate(:user, active: false)
+        alternate_email = inactive_user.user_emails.second.email
         Guardian.any_instance.expects(:can_check_emails?).returns(true)
 
         put :check_emails, params: {
@@ -2045,7 +2049,8 @@ describe UsersController do
 
         expect(response).to be_success
         json = JSON.parse(response.body)
-        expect(json["email"]).to be_present
+        expect(json["email"]).to eq(inactive_user.email)
+        expect(json["alternate_emails"]).to contain_exactly(alternate_email)
         expect(json["associated_accounts"]).to be_present
       end
 

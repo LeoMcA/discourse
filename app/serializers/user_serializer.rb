@@ -34,6 +34,7 @@ class UserSerializer < BasicUserSerializer
 
   attributes :name,
              :email,
+             :alternate_emails,
              :last_posted_at,
              :last_seen_at,
              :bio_raw,
@@ -143,6 +144,10 @@ class UserSerializer < BasicUserSerializer
   def include_email?
     (object.id && object.id == scope.user.try(:id)) ||
       (scope.is_staff? && object.staged?)
+  end
+
+  def include_alternate_emails?
+    include_email?
   end
 
   def can_change_bio

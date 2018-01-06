@@ -196,4 +196,69 @@ describe UserSerializer do
       expect(json[:custom_fields]['secret_field']).to eq(nil)
     end
   end
+
+  context "with alternate emails" do
+    let(:user) { Fabricate(:user_single_email) }
+
+    before do
+      Fabricate(:alternate_email, user: user, email: "first@email.com")
+      Fabricate(:alternate_email, user: user, email: "second@email.com")
+    end
+
+    shared_examples "shown" do
+      it "contains the user's alternate emails" do
+        alternate_emails = json[:alternate_emails]
+        expect(alternate_emails.length).to eq(2)
+        expect(alternate_emails.first).to eq("first@email.com")
+        expect(alternate_emails.second).to eq("second@email.com")
+      end
+    end
+
+    shared_examples "not shown" do
+      it "doesn't contain the user's alternate emails" do
+        alternate_emails = json[:alternate_emails]
+        expect(alternate_emails).to be_nil
+      end
+    end
+
+    shared_examples "staged shown" do
+      context "with a staged user" do
+        before do
+          user.staged = true
+        end
+
+        include_examples "shown"
+      end
+    end
+
+    context "as the user" do
+      let(:json) { UserSerializer.new(user, scope: Guardian.new(user), root: false).as_json }
+      include_examples "shown"
+    end
+
+    context "as an admin" do
+      let(:admin) { Fabricate(:admin) }
+      let(:json) { UserSerializer.new(user, scope: Guardian.new(admin), root: false).as_json }
+      include_examples "not shown"
+      include_examples "staged shown"
+    end
+
+    context "as a moderator" do
+      let(:moderator) { Fabricate(:moderator) }
+      let(:json) { UserSerializer.new(user, scope: Guardian.new(moderator), root: false).as_json }
+      include_examples "not shown"
+      include_examples "staged shown"
+    end
+
+    context "as another user" do
+      let(:user2) { Fabricate(:user) }
+      let(:json) { UserSerializer.new(user, scope: Guardian.new(user2), root: false).as_json }
+      include_examples "not shown"
+    end
+
+    context "as an anonymous user" do
+      let(:json) { UserSerializer.new(user, scope: Guardian.new, root: false).as_json }
+      include_examples "not shown"
+    end
+  end
 end

@@ -981,6 +981,10 @@ class User < ActiveRecord::Base
     end
   end
 
+  def alternate_emails
+    user_emails.where(primary: false).pluck(:email)
+  end
+
   def recent_time_read
     self.created_at && self.created_at < 60.days.ago ?
       self.user_visits.where('visited_at >= ?', 60.days.ago).sum(:time_read) :

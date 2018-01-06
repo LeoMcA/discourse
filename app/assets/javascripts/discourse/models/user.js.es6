@@ -489,7 +489,9 @@ const User = RestModel.extend({
     }).then(result => {
       if (result) {
         this.setProperties({
+          checked_emails: true,
           email: result.email,
+          alternate_emails: result.alternate_emails,
           associated_accounts: result.associated_accounts
         });
       }

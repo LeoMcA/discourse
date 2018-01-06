@@ -368,7 +368,7 @@ $mobile-breakpoint: 700px;
     }
 
     .d-editor-textarea-wrapper {
-      max-width: 60%; 
+      max-width: 60%;
       .d-editor-button-bar {
         overflow: hidden;
       }
@@ -1809,6 +1809,13 @@ table#user-badges {
     margin-top: 24px;
     margin-bottom: 40px;
   }
+}
+
+// Users
+
+.details .alternate-emails ul {
+  margin: 0;
+  list-style: none;
 }
 
 // Mobile specific styles

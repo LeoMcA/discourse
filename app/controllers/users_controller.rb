@@ -154,6 +154,7 @@ class UsersController < ApplicationController
 
     render json: {
       email: user.email,
+      alternate_emails: user.alternate_emails,
       associated_accounts: user.associated_accounts
     }
   rescue Discourse::InvalidAccess
