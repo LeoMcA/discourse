@@ -84,7 +84,7 @@ module ApplicationHelper
     end
 
 "<link rel='preload' href='#{path}' as='script'/>
-<script src='#{path}'></script>".html_safe
+<script src='#{path}' nonce='#{nonce}'></script>".html_safe
   end
 
   def discourse_csrf_tags
@@ -386,5 +386,9 @@ module ApplicationHelper
     end
 
     Stylesheet::Manager.stylesheet_link_tag(name, 'all', id)
+  end
+
+  def nonce
+    request.env["nonce"]
   end
 end

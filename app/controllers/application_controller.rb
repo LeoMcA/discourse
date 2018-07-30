@@ -52,6 +52,7 @@ class ApplicationController < ActionController::Base
   before_action :block_if_requires_login
   before_action :preload_json
   before_action :check_xhr
+  before_action :nonce_source
   after_action  :add_readonly_header
   after_action  :perform_refresh_session
   after_action  :dont_cache_page
@@ -460,6 +461,13 @@ class ApplicationController < ActionController::Base
 
   def secure_session
     SecureSession.new(session["secure_session_id"] ||= SecureRandom.hex)
+  end
+
+  def nonce_source
+    nonce = SecureRandom.base64
+    request.env["nonce"] = nonce
+    response.headers["X-Discourse-CSP-Nonce"] = nonce
+    response.headers["Content-Security-Policy"] = "script-src 'unsafe-eval' 'nonce-#{nonce}'; worker-src 'self';"
   end
 
   private
