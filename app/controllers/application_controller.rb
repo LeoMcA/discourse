@@ -16,6 +16,8 @@ require_dependency 'topic_query'
 require_dependency 'hijack'
 
 class ApplicationController < ActionController::Base
+  before_action :nonce_source
+
   include CurrentUser
   include CanonicalURL::ControllerExtensions
   include JsonError
@@ -52,7 +54,6 @@ class ApplicationController < ActionController::Base
   before_action :block_if_requires_login
   before_action :preload_json
   before_action :check_xhr
-  before_action :nonce_source
   after_action  :add_readonly_header
   after_action  :perform_refresh_session
   after_action  :dont_cache_page
