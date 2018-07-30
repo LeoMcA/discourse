@@ -467,7 +467,7 @@ class ApplicationController < ActionController::Base
     nonce = SecureRandom.base64
     request.env["nonce"] = nonce
     response.headers["X-Discourse-CSP-Nonce"] = nonce
-    response.headers["Content-Security-Policy"] = "script-src 'unsafe-eval' 'nonce-#{nonce}'; worker-src 'self';"
+    response.headers["Content-Security-Policy"] = SiteSetting.content_security_policy.gsub("%{nonce}", nonce)
   end
 
   private

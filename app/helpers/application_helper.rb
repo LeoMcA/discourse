@@ -375,7 +375,15 @@ module ApplicationHelper
 
   def theme_lookup(name)
     lookup = Theme.lookup_field(theme_id, mobile_view? ? :mobile : :desktop, name)
-    lookup.html_safe if lookup
+    # don't do this for body_tag to show how this prevents XSS
+    # if ["head_tag", "body_tag"].include? name
+    if name == "head_tag"
+      doc = Nokogiri::HTML.fragment(lookup.html_safe)
+      doc.css('script').each { |n| n['nonce'] = request.env["nonce"] }
+      doc.to_s
+    else
+      lookup.html_safe if lookup
+    end
   end
 
   def discourse_stylesheet_link_tag(name, opts = {})
