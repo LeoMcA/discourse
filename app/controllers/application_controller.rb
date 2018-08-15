@@ -16,7 +16,7 @@ require_dependency 'topic_query'
 require_dependency 'hijack'
 
 class ApplicationController < ActionController::Base
-  before_action :nonce_source
+  before_action :set_csp_header
 
   include CurrentUser
   include CanonicalURL::ControllerExtensions
@@ -464,7 +464,7 @@ class ApplicationController < ActionController::Base
     SecureSession.new(session["secure_session_id"] ||= SecureRandom.hex)
   end
 
-  def nonce_source
+  def set_csp_header
     nonce = SecureRandom.base64
     request.env["nonce"] = nonce
     response.headers["X-Discourse-CSP-Nonce"] = nonce
