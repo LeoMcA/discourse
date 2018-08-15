@@ -6,4 +6,10 @@ class QunitController < ApplicationController
   def index
     raise Discourse::InvalidAccess.new if Rails.env.production?
   end
+
+  # make nonce static and set restrictive csp for testing
+  def nonce_source
+    request.env["nonce"] = "1234"
+    response.headers["Content-Security-Policy"] = "script-src 'nonce-1234' 'unsafe-eval';"
+  end
 end

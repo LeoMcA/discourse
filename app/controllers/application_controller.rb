@@ -468,7 +468,13 @@ class ApplicationController < ActionController::Base
     nonce = SecureRandom.base64
     request.env["nonce"] = nonce
     response.headers["X-Discourse-CSP-Nonce"] = nonce
-    response.headers["Content-Security-Policy"] = SiteSetting.content_security_policy.gsub("%{nonce}", nonce)
+    host = Discourse.base_url.sub("http://", "")
+    cdn = GlobalSetting.cdn_url.to_s.sub(/^\/\//, request.protocol).presence
+    response.headers["Content-Security-Policy"] =
+      SiteSetting.content_security_policy
+        .gsub("%{nonce}", nonce)
+        .gsub("%{host}", host)
+        .gsub("%{cdn}", cdn || host)
   end
 
   private

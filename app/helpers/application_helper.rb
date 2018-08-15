@@ -83,7 +83,7 @@ module ApplicationHelper
       end
     end
 
-"<link rel='preload' href='#{path}' as='script'/>
+"<link rel='preload' href='#{path}' as='script' nonce='#{nonce}'/>
 <script src='#{path}' nonce='#{nonce}'></script>".html_safe
   end
 
@@ -375,11 +375,9 @@ module ApplicationHelper
 
   def theme_lookup(name)
     lookup = Theme.lookup_field(theme_id, mobile_view? ? :mobile : :desktop, name)
-    # don't do this for body_tag to show how this prevents XSS
-    # if ["head_tag", "body_tag"].include? name
-    if name == "head_tag"
+    if ["head_tag", "body_tag"].include? name
       doc = Nokogiri::HTML.fragment(lookup.html_safe)
-      doc.css('script').each { |n| n['nonce'] = request.env["nonce"] }
+      doc.css("script").each { |n| n["nonce"] = request.env["nonce"] }
       doc.to_s
     else
       lookup.html_safe if lookup

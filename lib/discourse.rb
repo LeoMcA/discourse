@@ -227,10 +227,22 @@ module Discourse
     SiteSetting.force_https? ? "https" : "http"
   end
 
+  def self.port
+    if Rails.env.development? || Rails.env.test?
+      ":3000"
+    else
+      default_port = SiteSetting.force_https? ? 443 : 80
+      if SiteSetting.port.to_i > 0 && SiteSetting.port.to_i != default_port
+        ":#{SiteSetting.port}"
+      else
+        ""
+      end
+    end
+  end
+
   def self.base_url_no_prefix
-    default_port = SiteSetting.force_https? ? 443 : 80
     url = "#{base_protocol}://#{current_hostname}"
-    url << ":#{SiteSetting.port}" if SiteSetting.port.to_i > 0 && SiteSetting.port.to_i != default_port
+    url << port
     url
   end
 
