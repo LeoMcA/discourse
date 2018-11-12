@@ -36,6 +36,11 @@ describe CspReportsController do
       SiteSetting.content_security_policy = false
       SiteSetting.content_security_policy_report_only = false
       SiteSetting.content_security_policy_collect_reports = true
+      SiteSetting.content_security_policy_collect_reports_no_header = true
+      send_report
+      expect(response.status).to eq(200)
+
+      SiteSetting.content_security_policy_collect_reports_no_header = false
       send_report
       expect(response.status).to eq(404)
 

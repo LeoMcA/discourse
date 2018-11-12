@@ -1286,6 +1286,7 @@ en:
     content_security_policy: EXPERIMENTAL - Turn on Content-Security-Policy
     content_security_policy_report_only: EXPERIMENTAL - Turn on Content-Security-Policy-Report-Only
     content_security_policy_collect_reports: Enable CSP violation report collection at /csp_reports
+    content_security_policy_collect_reports_no_header: Collect CSP violations even if no CSP header is set by Discourse (perhaps it's set by nginx instead)
     content_security_policy_script_src: Additional whitelisted script sources. The current host and CDN are included by default.
     top_menu: "Determine which items appear in the homepage navigation, and in what order. Example latest|new|unread|categories|top|read|posted|bookmarks"
     post_menu: "Determine which items appear on the post menu, and in what order. Example like|edit|flag|delete|share|bookmark|reply"

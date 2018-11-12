@@ -1190,6 +1190,8 @@ security:
     default: false
   content_security_policy_collect_reports:
     default: true
+  content_security_policy_collect_reports_no_header:
+    default: false
   content_security_policy_script_src:
     type: list
     default: ''

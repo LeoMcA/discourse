@@ -30,6 +30,10 @@ class CspReportsController < ApplicationController
   end
 
   def report_collection_enabled?
-    ContentSecurityPolicy.enabled? && SiteSetting.content_security_policy_collect_reports
+    (
+      ContentSecurityPolicy.enabled? ||
+      SiteSetting.content_security_policy_collect_reports_no_header
+    ) &&
+    SiteSetting.content_security_policy_collect_reports
   end
 end
